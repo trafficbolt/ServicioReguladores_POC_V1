@@ -1,0 +1,9 @@
+C:\Users\Dell\source\repos\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCServicioReguladores.csproj.SuggestedBindingRedirects.cache
+C:\Users\Dell\source\repos\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCServicioReguladores.csproj.CoreCompileInputs.cache
+C:\Users\Dell\source\repos\POCServicioReguladores\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe.config
+C:\Users\Dell\source\repos\POCServicioReguladores\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe
+C:\Users\Dell\source\repos\POCServicioReguladores\POCServicioReguladores\bin\Debug\POCServicioReguladores.pdb
+C:\Users\Dell\source\repos\POCServicioReguladores\POCServicioReguladores\bin\Debug\EasyModbus.dll
+C:\Users\Dell\source\repos\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCServicioReguladores.csproj.CopyComplete
+C:\Users\Dell\source\repos\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCServicioReguladores.exe
+C:\Users\Dell\source\repos\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCServicioReguladores.pdb

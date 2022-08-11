@@ -1,0 +1,9 @@
+C:\POCServicioReguladores\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe.config
+C:\POCServicioReguladores\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe
+C:\POCServicioReguladores\POCServicioReguladores\bin\Debug\POCServicioReguladores.pdb
+C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCSR.csproj.AssemblyReference.cache
+C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCSR.csproj.SuggestedBindingRedirects.cache
+C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCSR.csproj.CoreCompileInputs.cache
+C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCSR.csproj.CopyComplete
+C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCServicioReguladores.exe
+C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCServicioReguladores.pdb
