@@ -19,35 +19,13 @@ namespace POCServicioReguladores
     partial class MR : ServiceBase
     {
         #region DeclaracionVariables
-        static string conexionstring = "Server= DESKTOP-QV9DU6V\\SQLEXPRESS; Database= AIFA-DATA-MANAGEMENT; Integrated Security = SSPI; ";
+        private static string conexionstring = "Server= DESKTOP-QV9DU6V\\SQLEXPRESS; Database= AIFA-DATA-MANAGEMENT; Integrated Security = SSPI; ";
         //static string conexionstring = "Server=192.168.3.215;Database=AIFA-DATA-MANAGEMENT;user id =sa;password=AIFA2020";
-        SqlConnection conexion = new SqlConnection(conexionstring);
-
-        List<string> ipsToUpdateAsync;
-
-        System.Timers.Timer oTimer;
-
-        string query1;
-        string query2;
-        string query3;
-        string cadena1;
-        string IDBOTON;
-        string STATUS;        
-        string valorObtenido;
-        string Cabecera_activa_norte;
-        string Cabecera_activa_centro;
-
-        int contador = 1;
-        int valor;
-        int estadoNorte;
-        int estadoCentro;
-        int estadoRodaje;
-        int flag;
-        int destellos = 0;
-
-        bool bInicioRecorrido = false;
-        DataTable datos = new DataTable();
-
+        private SqlConnection conexion = new SqlConnection(conexionstring);
+        private List<string> ipsToUpdateAsync;
+        private System.Timers.Timer oTimer;        
+        private bool bInicioRecorrido = false;
+        private int destellos = 0;
         #endregion        
 
         protected override void OnStart(string[] args)
@@ -72,8 +50,7 @@ namespace POCServicioReguladores
         protected override void OnStop()
         {            
             Log.WriteToFile($"Service is stopped at: { DateTime.Now }");
-        }       
-        
+        }               
 
         private Dictionary<string, string> GetIPs()
         {
@@ -102,8 +79,105 @@ namespace POCServicioReguladores
             return ips;
         }
 
+        private Dictionary<int, Tuple<string, string>> GetIds()
+        {
+            Dictionary<int, Tuple<string, string>> idsResult = new Dictionary<int, Tuple<string, string>>();            
+            var ids = new List<string>();
+            try
+            {
+                conexion.Open();
+                string q = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED SELECT idBoton FROM sw_estados_reguladores WITH (NOLOCK)";
+                SqlCommand comando = new SqlCommand(q, conexion);
+                SqlDataAdapter data = new SqlDataAdapter(comando);
+                DataTable tabla = new DataTable();
+                data.Fill(tabla);                
+                foreach (DataRow dr in tabla.Rows)
+                {
+                    ids.Add(dr[0].ToString());
+                }
 
-        #region Metodos
+                ids.ForEach(id =>
+                {
+                    switch (id)
+                    {
+                        case "APROXIMACIONES NORTE 04L": idsResult.Add(PistaEnum.NORTE.GetHashCode(), Tuple.Create(id, "ID_APROXIMACION")); break;
+                        case "PAPI 04L":  idsResult.Add(PistaEnum.NORTE.GetHashCode(), Tuple.Create(id, "ID_PAPI")); break;
+                        case "FLASH 04L":  idsResult.Add(PistaEnum.NORTE.GetHashCode(), Tuple.Create(id, "ID_Destellos")); break;
+                        case "APROXIMACIONES NORTE 22R":  idsResult.Add(PistaEnum.NORTE.GetHashCode(), Tuple.Create(id, "ID_APROXIMACION")); break;
+                        case "PAPI 22R":  idsResult.Add(PistaEnum.NORTE.GetHashCode(), Tuple.Create(id, "ID_PAPI")); break;
+                        case "FLASH 22R":  idsResult.Add(PistaEnum.NORTE.GetHashCode(), Tuple.Create(id, "ID_Destellos")); break;
+                        case "TDZ 04L": ; idsResult.Add(PistaEnum.NORTE.GetHashCode(), Tuple.Create(id, "ID_TDZ")); break;
+                        case "BORDE DE PISTA NORTE":  idsResult.Add(PistaEnum.NORTE.GetHashCode(), Tuple.Create(id, "ID_BORDES")); break;
+                        case "EJE DE PISTA NORTE":  idsResult.Add(PistaEnum.NORTE.GetHashCode(), Tuple.Create(id, "ID_EJE")); break;
+
+                        case "APROXIMACIONES 04C": idsResult.Add(PistaEnum.CENTRAL.GetHashCode(), Tuple.Create(id, "ID_APROXIMACION")); break;
+                        case "PAPI 04C":  idsResult.Add(PistaEnum.CENTRAL.GetHashCode(), Tuple.Create(id, "ID_PAPI")); break;
+                        case "FLASH 04C":  idsResult.Add(PistaEnum.CENTRAL.GetHashCode(), Tuple.Create(id, "ID_Destellos")); break;
+                        case "APROXIMACIONES 22C":  idsResult.Add(PistaEnum.CENTRAL.GetHashCode(), Tuple.Create(id, "ID_APROXIMACION")); break;
+                        case "PAPI 22C":  idsResult.Add(PistaEnum.CENTRAL.GetHashCode(), Tuple.Create(id, "ID_PAPI")); break;
+                        case "FLASH 22C":  idsResult.Add(PistaEnum.CENTRAL.GetHashCode(), Tuple.Create(id, "ID_Destellos")); break;
+                        case "TDZ 04C":  idsResult.Add(PistaEnum.CENTRAL.GetHashCode(), Tuple.Create(id, "ID_TDZ")); break;
+                        case "BORDE DE PISTA CENTRO":  idsResult.Add(PistaEnum.CENTRAL.GetHashCode(), Tuple.Create(id, "ID_BORDES")); break;
+                        case "EJE DE PISTA CENTRO": idsResult.Add(PistaEnum.CENTRAL.GetHashCode(), Tuple.Create(id, "ID_EJE")); break;
+
+                        case "BARRAS DE PARADA K04C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_BARRAS_K2_K7")); break;
+                        case "BARRAS DE PARADA PQ-04C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BARRAS_DE_PARADA_PQ04C")); break;
+                        case "BARRAS DE PARADA K22C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_BARRAS_K11_K17")); break;
+                        case "BARRAS DE PARADA A04L":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_BARRAS_A1_A6")); break;
+                        case "BARRAS DE PARADA PQ04L":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BARRAS_DE_PARADA_PQ04L")); break;
+                        case "BARRAS DE PARADA A22R":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_BARRAS_A8_A15")); break;
+                        case "EJE A04L":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_A04L")); break;
+                        case "EJE A04L2":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_A04L2")); break;
+                        case "EJE APQ 22R":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_APQ22R")); break;
+                        case "EJE AB 22R":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_AB22R")); break;
+                        case "EJE B04L":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_B04L")); break;
+                        case "EJE B04L2":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_B04L2")); break;
+                        case "EJE BPQ22R":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_BPQ22r")); break;
+                        case "EJE CC":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_CC")); break;
+                        case "EJE EF04L":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EF04L")); break;
+                        case "EJE FE04C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_FE04C")); break;
+                        case "EJE HK04C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_HK04C")); break;
+                        case "EJE HJ04C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_HJ04C")); break;
+                        case "EJE J04C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_J04C")); break;
+                        case "EJE JPQ04C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_JPQ04C")); break;
+                        case "EJE JJ22C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_JJ22C")); break;
+                        case "EJE J22C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_J22C")); break;
+                        case "EJE K04C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_K04C")); break;
+                        case "EJE KPQ04C22C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_KPQ04C22C")); break;
+                        case "EJE KPQ04C22C2":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_KPQ04C22C2")); break;
+                        case "EJE K22C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_K22C")); break;
+                        case "EJE PQ22R":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_PQ22R"));break;
+                        case "EJE PQ04C":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_PQ04C")); break;
+                        case "BORDES NORTE":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_BORDES_NORTE")); break;
+                        case "BORDES CENTRO":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_BORDES_CENTRAL")); break;
+                        case "LETREROS NORTE":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_LETREROS_NORTE")); break;
+                        case "LETREROS CENTRO":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_LERTREROS_CENTRAL")); break;
+                        case "EJE Z":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_Z")); break;
+                        case "TODOS LOS ATRAQUES":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_ATRAQUES")); break;
+                        case "EJE B22R":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_EJE_B22R")); break;
+                        case "EJE SALIDA RAPIDAS NORTE RETA6":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_SALIDAS_RET_A6")); break;
+                        case "EJE SALIDA RAPIDAS NORTE RETA8":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_SALIDAS_RET_A8")); break;
+                        case "EJE SALIDA RAPIDAS NORTE TLO A1-A5":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_SALIDAS_TLO_A1_A5")); break;
+                        case "EJE SALIDA RAPIDAS NORTE TLO A9-A15":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_SALIDAS_TLO_A9_A15")); break;
+                        case "EJE SALIDA RAPIDAS CENTRO RET K7":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_SALIDAS_RET_K7")); break;
+                        case "EJE SALIDA RAPIDAS CENTRO RET K11":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_SALIDAS_RET_K11")); break;
+                        case "EJE SALIDA RAPIDAS CENTRO TLO K2-K6":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_SALIDAS_TLO_K2_K6")); break;
+                        case "EJE SALIDA RAPIDAS CENTRO TLO K14-K17":  idsResult.Add(PistaEnum.RODAJES.GetHashCode(), Tuple.Create(id, "ID_BOTON_SALIDAS_TLO_K14_K17")); break;
+                        default: break;
+                    }                                                                
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.WriteToFile($"GetIds | Exception: { ex.Message }");
+            }
+            finally
+            {
+                conexion.Close();
+            }
+            return idsResult;
+        }
+
         private string Consulta_Comunicacion(ModbusClient modbusClient, string pIp, string pNomenclatura)
         {
             int[] response = null;
@@ -252,9 +326,6 @@ namespace POCServicioReguladores
                 {
                     status0 = "5";
                 }
-
-                //Actualiza_BD_1(pIp, status0, pNomenclatura, new SqlConnection(conexionstring));
-                //UpdateQueryIpsAsync(pIp, status0, pNomenclatura);
             }
             catch (Exception ex)
             {
@@ -266,19 +337,6 @@ namespace POCServicioReguladores
             }
 
             return $"Update sw_estados_reguladores set ip = '{ pIp }', status = '{ status0 }' Where nomenclatura = '{ pNomenclatura }' ";
-        }
-
-        private void UpdateQueryIpsAsync(string pIp, string pStatus, string pNomenclatura)
-        {
-            try
-            {
-                var query = $"Update sw_estados_reguladores set ip = '{ pIp }', status = '{ pStatus }' Where nomenclatura = '{ pNomenclatura }' ";
-                ipsToUpdateAsync.Add(query);
-            }
-            catch(Exception ex)
-            {
-                Log.WriteToFile($"UpdateQueryIpsAsync | Exception: { ex.Message }");
-            }            
         }
 
         private void ActualizaIpsAsync()
@@ -304,29 +362,12 @@ namespace POCServicioReguladores
                 conexion.Close();
                 ipsToUpdateAsync = new List<string>();
             }
-        }
-        private void Actualiza_BD_1(string pIp, string pStatus, string pNomenclatura, SqlConnection conexionBD)
-        {
-            try
-            {
-                conexionBD.Open();
-                flag = 0;                
-                cadena1 = "Update sw_estados_reguladores set ip = '" + pIp + "', status = '" + pStatus + "' Where nomenclatura = '" + pNomenclatura + "'";
-                SqlCommand comando1 = new SqlCommand(cadena1, conexionBD);
-                comando1.ExecuteNonQuery();                                
-            }
-            catch(Exception ex)
-            {
-                Log.WriteToFile($"Actualiza_BD_1 | Exception:  { ex.Message}, at: { DateTime.Now }");
-            }
-            finally
-            {
-                conexionBD.Close();
-            }
-        }
+        }        
 
-        private int Consulta(string query)
+        private int GetStatus(string query)
         {
+            int result = 0;
+
             try
             {
                 conexion.Open();
@@ -334,52 +375,40 @@ namespace POCServicioReguladores
                 SqlCommand comando = new SqlCommand(query, conexion);
                 SqlDataAdapter data = new SqlDataAdapter(comando);
                 DataTable tabla = new DataTable();
-                data.Fill(tabla);
-                conexion.Close();
+                data.Fill(tabla);                
 
                 foreach (DataRow dgvR in tabla.Rows)
                 {
                     for (int j = 0; j < tabla.Columns.Count; ++j)
                     {
                         object val = dgvR[j];
-                        if (val == null)
+                        if (val != null)
                         {
-
-                        }
-                        else
-                        {
-                            valorObtenido = val.ToString();
-                        }
+                            result = int.Parse(val.ToString());
+                        }                        
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Log.WriteToFile($"Consulta | Exception: { ex.Message }");
             }
-            valor = Convert.ToInt32(valorObtenido);
-            return valor;
+            finally
+            {
+                conexion.Close();
+            }
+
+            return result;
         }
 
         private void Actualiza_Tablas_Norte(string idBoton, string status)
         {
             try
-            {
-                flag = 0;
+            {                
                 conexion.Open();
-                query3 = "Update sw_estados_norte set status = '" + status + "' Where idBoton = '" + idBoton + "'";
-                SqlCommand comando2 = new SqlCommand(query3, conexion);
-                flag = comando2.ExecuteNonQuery();
-                conexion.Close();
-
-                if (flag == 1)
-                {
-
-                }
-                else
-                {
-
-                }
+                var query = "Update sw_estados_norte set status = '" + status + "' Where idBoton = '" + idBoton + "'";
+                SqlCommand comando2 = new SqlCommand(query, conexion);
+                comando2.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -395,19 +424,10 @@ namespace POCServicioReguladores
         {
             try
             {
-                flag = 0;
                 conexion.Open();
-                query3 = "Update sw_estados_central set idBoton = '" + idBoton + "', status = '" + status + "' Where idBoton = '" + idBoton + "'";
-                SqlCommand comando3 = new SqlCommand(query3, conexion);
-                flag = comando3.ExecuteNonQuery();               
-                if (flag == 1)
-                {
-
-                }
-                else
-                {
-
-                }
+                var query = "Update sw_estados_central set idBoton = '" + idBoton + "', status = '" + status + "' Where idBoton = '" + idBoton + "'";
+                SqlCommand comando3 = new SqlCommand(query, conexion);
+                comando3.ExecuteNonQuery();                               
             }    
             catch(Exception ex)
             {
@@ -423,20 +443,10 @@ namespace POCServicioReguladores
         {
             try
             {
-                flag = 0;
                 conexion.Open();
-                query3 = "Update sw_estados_rodajes set idBoton = '" + idBoton + "', status = '" + status + "' Where idBoton = '" + idBoton + "'";
-                SqlCommand comando4 = new SqlCommand(query3, conexion);
-                flag = comando4.ExecuteNonQuery();
-                
-                if (flag == 1)
-                {
-
-                }
-                else
-                {
-
-                }
+                var query = "Update sw_estados_rodajes set idBoton = '" + idBoton + "', status = '" + status + "' Where idBoton = '" + idBoton + "'";
+                SqlCommand comando4 = new SqlCommand(query, conexion);
+                comando4.ExecuteNonQuery();              
             }
             catch(Exception ex)
             {
@@ -448,43 +458,43 @@ namespace POCServicioReguladores
             }
         }
 
-        private void Cambia_estados_norte(int estadoNorte, string IDBOTON)
+        private void Cambia_estados_norte(int estadoNorte, string idBoton)
         {
             //  Timeout - Alarmado
             if (estadoNorte == 6)
             {
-                STATUS = ReguladorEnum.TIME_OUT.GetHashCode().ToString();
-                Actualiza_Tablas_Norte(IDBOTON, STATUS);
+                var status = ReguladorEnum.TIME_OUT.GetHashCode().ToString();
+                Actualiza_Tablas_Norte(idBoton, status);
             }
             //  Inalcanzable
             else if (estadoNorte == 5 || estadoNorte == 0)
             {
-                STATUS = ReguladorEnum.INALCANZABLE.GetHashCode().ToString();
-                Actualiza_Tablas_Norte(IDBOTON, STATUS);
+                var status = ReguladorEnum.INALCANZABLE.GetHashCode().ToString();
+                Actualiza_Tablas_Norte(idBoton, status);
             }
             //  No alarmado - Trabado
             else if (estadoNorte == 4)
             {
-                STATUS = ReguladorEnum.NO_ALARMADO.GetHashCode().ToString();
-                Actualiza_Tablas_Norte(IDBOTON, STATUS);
+                var status = ReguladorEnum.NO_ALARMADO.GetHashCode().ToString();
+                Actualiza_Tablas_Norte(idBoton, status);
             }
             //  Local
             else if (estadoNorte == 3)
             {
-                STATUS = ReguladorEnum.LOCAL.GetHashCode().ToString();
-                Actualiza_Tablas_Norte(IDBOTON, STATUS);
+                var status = ReguladorEnum.LOCAL.GetHashCode().ToString();
+                Actualiza_Tablas_Norte(idBoton, status);
             }
             //  Mantenimiento
             else if (estadoNorte == 2)
             {
-                STATUS = ReguladorEnum.MANTENIMIENTO.GetHashCode().ToString();
-                Actualiza_Tablas_Norte(IDBOTON, STATUS);
+                var status = ReguladorEnum.MANTENIMIENTO.GetHashCode().ToString();
+                Actualiza_Tablas_Norte(idBoton, status);
             }
             //  Correcto
             else if (estadoNorte == -1)
             {
-                STATUS = ReguladorEnum.CORRECTO.GetHashCode().ToString();
-                Actualiza_Tablas_Norte(IDBOTON, STATUS);
+                var status = ReguladorEnum.CORRECTO.GetHashCode().ToString();
+                Actualiza_Tablas_Norte(idBoton, status);
             }
         }
 
@@ -493,38 +503,38 @@ namespace POCServicioReguladores
             //  Timeout - Alarmado
             if (estadoCentro == 6)
             {
-                STATUS = "3";
-                Actualiza_Tablas_Centro(IDBOTON, STATUS);
+                var status = "3";
+                Actualiza_Tablas_Centro(IDBOTON, status);
             }
             //  Inalcanzable
             else if (estadoCentro == 5 || estadoCentro == 0)
             {
-                STATUS = "4";
-                Actualiza_Tablas_Centro(IDBOTON, STATUS);
+                var status = "4";
+                Actualiza_Tablas_Centro(IDBOTON, status);
             }
             //  No alarmado - Trabado
             else if (estadoCentro == 4)
             {
-                STATUS = "5";
-                Actualiza_Tablas_Centro(IDBOTON, STATUS);
+                var status = "5";
+                Actualiza_Tablas_Centro(IDBOTON, status);
             }
             //  Local
             else if (estadoCentro == 3)
             {
-                STATUS = "2";
-                Actualiza_Tablas_Centro(IDBOTON, STATUS);
+                var status = "2";
+                Actualiza_Tablas_Centro(IDBOTON, status);
             }
             //  Mantenimiento
             else if (estadoCentro == 2)
             {
-                STATUS = "6";
-                Actualiza_Tablas_Centro(IDBOTON, STATUS);
+                var status = "6";
+                Actualiza_Tablas_Centro(IDBOTON, status);
             }
             //  Correcto
             else if (estadoCentro == -1)
             {
-                STATUS = "1";
-                Actualiza_Tablas_Centro(IDBOTON, STATUS);
+                var status = "1";
+                Actualiza_Tablas_Centro(IDBOTON, status);
             }
         }
 
@@ -533,38 +543,38 @@ namespace POCServicioReguladores
             //  Timeout - Alarmado
             if (estadoRodaje == 6)
             {
-                STATUS = "3";
-                Actualiza_Tablas_Rodajes(IDBOTON, STATUS);
+                var status = "3";
+                Actualiza_Tablas_Rodajes(IDBOTON, status);
             }
             //  Inalcanzable
             else if (estadoRodaje == 5 || estadoRodaje == 0)
             {
-                STATUS = "4";
-                Actualiza_Tablas_Rodajes(IDBOTON, STATUS);
+                var status = "4";
+                Actualiza_Tablas_Rodajes(IDBOTON, status);
             }
             //  No alarmado - Trabado
             else if (estadoRodaje == 4)
             {
-                STATUS = "5";
-                Actualiza_Tablas_Rodajes(IDBOTON, STATUS);
+                var status = "5";
+                Actualiza_Tablas_Rodajes(IDBOTON, status);
             }
             //  Local
             else if (estadoRodaje == 3)
             {
-                STATUS = "2";
-                Actualiza_Tablas_Rodajes(IDBOTON, STATUS);
+                var status = "2";
+                Actualiza_Tablas_Rodajes(IDBOTON, status);
             }
             //  Mantenimiento
             else if (estadoRodaje == 2)
             {
-                STATUS = "6";
-                Actualiza_Tablas_Rodajes(IDBOTON, STATUS);
+                var status = "6";
+                Actualiza_Tablas_Rodajes(IDBOTON, status);
             }
             //  Correcto
             else if (estadoRodaje == -1)
             {
-                STATUS = "1";
-                Actualiza_Tablas_Rodajes(IDBOTON, STATUS);
+                var status = "1";
+                Actualiza_Tablas_Rodajes(IDBOTON, status);
             }
         }
 
@@ -592,24 +602,33 @@ namespace POCServicioReguladores
             return tabla;
         }
 
-        #endregion      
+        private void UpdateStatus(PistaEnum pista, string idBoton, string idBotonUI)
+        {
+            var query = $"select max(status) from sw_estados_reguladores where idBoton='{ idBoton }'";
+            var status = GetStatus(query);
+
+            switch (pista)
+            {
+                case PistaEnum.NORTE:
+                    Cambia_estados_norte(status, idBotonUI);
+                    break;
+                case PistaEnum.CENTRAL:
+                    Cambia_estados_centro(status, idBotonUI);
+                    break;
+                case PistaEnum.RODAJES:
+                    Cambia_estados_rodajes(status, idBotonUI);
+                    break;
+            }            
+        }
         
         async void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            if (bInicioRecorrido)
+                return;
 
             try
-            {
-                if (bInicioRecorrido)
-                    return;
-
-                bInicioRecorrido = true;
-
-                //datos = ConsultaCabecera();
-
-                //Cabecera_activa_norte = datos.Rows[0]["Cabecera"].ToString();
-                //Cabecera_activa_centro = datos.Rows[1]["Cabecera"].ToString();
-
-                //destellos = 0;
+            {                
+                bInicioRecorrido = true;                
 
                 Debugger.Launch();
 
@@ -620,410 +639,54 @@ namespace POCServicioReguladores
 
                 Log.WriteToFile($"3. Get IP's...");
                 var ips = GetIPs();
-
-                if(ips.Count == 164)
-                {
-                    ips.ToList().ForEach(obj =>
-                    {
-                        var t = new Task<string>(() =>
-                        {
-                            var modbusClient = new ModbusClient(obj.Value, 502);
-                            var result = Consulta_Comunicacion(modbusClient, obj.Value, obj.Key);
-                            return result;
-                        });
-                        
-                        t.Start();
-                        tasks.Add(t);                        
-                    });
-                } else
-                {
-                    Log.WriteToFile($"**** GetIPs method did not get all ips");
-                }
                 
-
-                if(ips.Count == tasks.Count)
+                ips.ToList().ForEach(obj =>
                 {
-                    var tasksToAwait = Task.WhenAll(tasks);
-                    try
+                    var t = new Task<string>(() =>
                     {
-                        await tasksToAwait;
-                        tasks.ForEach(x => {
-                            var query = ((Task<string>)x).Result;
-                            ipsToUpdateAsync.Add(query);
-                        });                                                
-                    }
-                    catch
-                    {
-                        Log.WriteToFile($"**** Await tasks exception: { tasksToAwait.Exception }");
-                    }
-                }
-                else
+                        var modbusClient = new ModbusClient(obj.Value, 502);
+                        var result = Consulta_Comunicacion(modbusClient, obj.Value, obj.Key);
+                        return result;
+                    });
+                        
+                    t.Start();
+                    tasks.Add(t);                        
+                });                                
+                    
+                var tasksToAwait = Task.WhenAll(tasks);
+                try
                 {
-                    Log.WriteToFile($"**** The ips length and tasks are not equal");
+                    await tasksToAwait;
+                    tasks.ForEach(x => {
+                        var query = ((Task<string>)x).Result;
+                        ipsToUpdateAsync.Add(query);
+                    });                                                 
                 }
+                catch
+                {
+                    Log.WriteToFile($"**** Await tasks exception: { tasksToAwait.Exception }");
+                }                
                 
                 Log.WriteToFile($"4. Modbus Client processed successfully at { DateTime.Now }");
                 
                 Log.WriteToFile($"5. Updating data. Length: { ipsToUpdateAsync.Count }");
                 ActualizaIpsAsync();
 
-                //#region Norte
-                ////Pista norte
-                //if (contador == 169)
-                //{
-                //    if (Cabecera_activa_norte == "idCabeceraL")
-                //    {
-                //        //Aproximaciones
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='APROXIMACIONES NORTE 04L'";
-                //        estadoNorte = Consulta(query2);
-                //        IDBOTON = "ID_APROXIMACION";
-                //        Cambia_estados_norte(estadoNorte, IDBOTON);
-                //        //PAPI
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='PAPI 04L'";
-                //        estadoNorte = Consulta(query2);
-                //        IDBOTON = "ID_PAPI";
-                //        Cambia_estados_norte(estadoNorte, IDBOTON);
-                //        //Destello
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='FLASH 04L'";
-                //        estadoNorte = Consulta(query2);
-                //        IDBOTON = "ID_Destellos";
-                //        Cambia_estados_norte(estadoNorte, IDBOTON);
-                //    }
-                //    else
-                //    {
-                //        //Aproximaciones
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='APROXIMACIONES NORTE 22R'";
-                //        estadoNorte = Consulta(query2);
-                //        IDBOTON = "ID_APROXIMACION";
-                //        Cambia_estados_norte(estadoNorte, IDBOTON);
-                //        //PAPI
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='PAPI 22R'";
-                //        estadoNorte = Consulta(query2);
-                //        IDBOTON = "ID_PAPI";
-                //        Cambia_estados_norte(estadoNorte, IDBOTON);
-                //        ////Destello
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='FLASH 22R'";
-                //        estadoNorte = Consulta(query2);
-                //        IDBOTON = "ID_Destellos";
-                //        Cambia_estados_norte(estadoNorte, IDBOTON);
-                //    }
-                //    //TDZ 04L
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='TDZ 04L'";
-                //    estadoNorte = Consulta(query2);
-                //    IDBOTON = "ID_TDZ";
-                //    Cambia_estados_norte(estadoNorte, IDBOTON);
-                //    //BORDES 04L y 22R
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BORDE DE PISTA NORTE'";
-                //    estadoNorte = Consulta(query2);
-                //    IDBOTON = "ID_BORDES";
-                //    Cambia_estados_norte(estadoNorte, IDBOTON);
-                //    //EJES 04L y 22R
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE DE PISTA NORTE'";
-                //    estadoNorte = Consulta(query2);
-                //    IDBOTON = "ID_EJE";
-                //    Cambia_estados_norte(estadoNorte, IDBOTON);
-                //}
-                //#endregion
+                Debugger.Launch();
 
-                //#region Central
-                ////Pista central
-                //if (contador == 170)
-                //{
-                //    if (Cabecera_activa_centro == "idCabeceraL")
-                //    {
-                //        //Aproximaciones
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='APROXIMACIONES 04C'";
-                //        estadoCentro = Consulta(query2);
-                //        IDBOTON = "ID_APROXIMACION";
-                //        Cambia_estados_centro(estadoCentro, IDBOTON);
-                //        //PAPI
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='PAPI 04C'";
-                //        estadoCentro = Consulta(query2);
-                //        IDBOTON = "ID_PAPI";
-                //        Cambia_estados_centro(estadoCentro, IDBOTON);
-                //        //Destello
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='FLASH 04C'";
-                //        estadoCentro = Consulta(query2);
-                //        IDBOTON = "ID_Destellos";
-                //        Cambia_estados_centro(estadoCentro, IDBOTON);
-                //    }
-                //    else
-                //    {
-                //        //Aproximaciones
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='APROXIMACIONES 22C'";
-                //        estadoCentro = Consulta(query2);
-                //        IDBOTON = "ID_APROXIMACION";
-                //        Cambia_estados_centro(estadoCentro, IDBOTON);
-                //        //PAPI
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='PAPI 22C'";
-                //        estadoCentro = Consulta(query2);
-                //        IDBOTON = "ID_PAPI";
-                //        Cambia_estados_centro(estadoCentro, IDBOTON);
-                //        //Destello
-                //        query2 = "select max(status) from sw_estados_reguladores where idBoton='FLASH 22C'";
-                //        estadoCentro = Consulta(query2);
-                //        IDBOTON = "ID_Destellos";
-                //        Cambia_estados_centro(estadoCentro, IDBOTON);
-                //    }
-                //    //TDZ 04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='TDZ 04C'";
-                //    estadoCentro = Consulta(query2);
-                //    IDBOTON = "ID_TDZ";
-                //    Cambia_estados_centro(estadoCentro, IDBOTON);
-                //    //BORDES 04C y 22C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BORDE DE PISTA CENTRO'";
-                //    estadoCentro = Consulta(query2);
-                //    IDBOTON = "ID_BORDES";
-                //    Cambia_estados_centro(estadoCentro, IDBOTON);
-                //    //EJES 04C y 22C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE DE PISTA CENTRO'";
-                //    estadoCentro = Consulta(query2);
-                //    IDBOTON = "ID_EJE";
-                //    Cambia_estados_centro(estadoCentro, IDBOTON);
-                //}
-                //#endregion
+                Log.WriteToFile($"6. Getting header data...");
+                var cabeceraResult = ConsultaCabecera();
+                var cabeceraActivaNorte = cabeceraResult.Rows[0]["Cabecera"].ToString();
+                var cabeceraActivaCentral = cabeceraResult.Rows[1]["Cabecera"].ToString();
 
-                //#region Rodajes
-                ////Rodajes 1
-                //if (contador == 171)
-                //{
-                //    //Barras de parada K04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BARRAS DE PARADA K04C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_BARRAS_K2_K7";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //Barras de parada PQ-04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BARRAS DE PARADA PQ-04C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BARRAS_DE_PARADA_PQ04C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //Barras de parada K22C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BARRAS DE PARADA K22C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_BARRAS_K11_K17";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //Barras de parada A04L
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BARRAS DE PARADA A04L'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_BARRAS_A1_A6";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //Barras de parada PQ04L
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BARRAS DE PARADA PQ04L'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BARRAS_DE_PARADA_PQ04L";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //Barras de parada A22R
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BARRAS DE PARADA A22R'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_BARRAS_A8_A15";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE A04L 1
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE A04L'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_A04L";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE A04L 2
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE A04L2'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_A04L2";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE APQ 22R
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE APQ 22R'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_APQ22R";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE AB 22R
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE AB 22R'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_AB22R";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE B04L 1
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE B04L'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_B04L";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE B04L 2
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE B04L2'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_B04L2";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE BPQ22R
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE BPQ22R'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_BPQ22r";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE CC
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE CC'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_CC";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE EF04L
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE EF04L'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EF04L";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE FE04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE FE04C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_FE04C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE HK04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE HK04C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_HK04C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE HJ04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE HJ04C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_HJ04C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE J04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE J04C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_J04C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE JPQ04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE JPQ04C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_JPQ04C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE JJ22C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE JJ22C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_JJ22C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE J22C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE J22C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_J22C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE K04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE K04C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_K04C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //}
-                //#endregion
+                Log.WriteToFile($"7. Getting button's id...");
+                var idButtons = GetIds();                
 
-                //#region Rodajes 2
-                ////Rodajes 2
-                //if (contador == 172)
-                //{
-                //    //EJE KPQ04C22C 1
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE KPQ04C22C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_KPQ04C22C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE KPQ04C22C 2
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE KPQ04C22C2'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_KPQ04C22C2";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE K22C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE K22C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_K22C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE PQ22R
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE PQ22R'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_PQ22R";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE PQ04C
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE PQ04C'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_PQ04C";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //BORDES NORTE
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BORDES NORTE'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_BORDES_NORTE";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //BORDES CENTRO
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='BORDES CENTRO'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_BORDES_CENTRAL";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //LETREROS NORTE
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='LETREROS NORTE'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_LETREROS_NORTE";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //LETREROS CENTRO
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='LETREROS CENTRO'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_LERTREROS_CENTRAL";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE Z
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE Z'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_Z";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //TODOS LOS ATRAQUES
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='TODOS LOS ATRAQUES'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_ATRAQUES";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE B22R
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE B22R'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_EJE_B22R";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE SALIDA RAPIDAS NORTE RETA6
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE SALIDA RAPIDAS NORTE RETA6'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_SALIDAS_RET_A6";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE SALIDA RAPIDAS NORTE RETA8
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE SALIDA RAPIDAS NORTE RETA8'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_SALIDAS_RET_A8";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE SALIDA RAPIDAS NORTE TLO A1-A5
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE SALIDA RAPIDAS NORTE TLO A1-A5'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_SALIDAS_TLO_A1_A5";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE SALIDA RAPIDAS NORTE TLO A9-A15
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE SALIDA RAPIDAS NORTE TLO A9-A15'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_SALIDAS_TLO_A9_A15";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE SALIDA RAPIDAS CENTRO RET K7
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE SALIDA RAPIDAS CENTRO RET K7'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_SALIDAS_RET_K7";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE SALIDA RAPIDAS CENTRO RET K11
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE SALIDA RAPIDAS CENTRO RET K11'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_SALIDAS_RET_K11";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE SALIDA RAPIDAS CENTRO TLO K2-K6
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE SALIDA RAPIDAS CENTRO TLO K2-K6'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_SALIDAS_TLO_K2_K6";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //    //EJE SALIDA RAPIDAS CENTRO TLO K14-K17
-                //    query2 = "select max(status) from sw_estados_reguladores where idBoton='EJE SALIDA RAPIDAS CENTRO TLO K14-K17'";
-                //    estadoRodaje = Consulta(query2);
-                //    IDBOTON = "ID_BOTON_SALIDAS_TLO_K14_K17";
-                //    Cambia_estados_rodajes(estadoRodaje, IDBOTON);
-                //}
-                //#endregion
-
-
-                //if (contador == 173)
-                //{
-                //    contador = 0;
-                //    oTimer.Interval = Convert.ToInt32(ConfigurationManager.AppSettings["intervalosEjecucion"]);
-                //}
-                //else
-                //{
-                //    //Consulta_Comunicacion(query1);
-                //}
-
-                //contador++;                
+                Log.WriteToFile($"8. Updating states...");
+                idButtons.ToList().ForEach(x => {
+                    var data = x.Value;                    
+                    UpdateStatus((PistaEnum)x.Key, x.Value.Item1, x.Value.Item2);
+                });               
             }
             catch (Exception ex)
             {

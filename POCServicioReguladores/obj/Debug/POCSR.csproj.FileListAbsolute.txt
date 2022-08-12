@@ -7,3 +7,11 @@ C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCSR.csproj.CoreComp
 C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCSR.csproj.CopyComplete
 C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCServicioReguladores.exe
 C:\POCServicioReguladores\POCServicioReguladores\obj\Debug\POCServicioReguladores.pdb
+C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe.config
+C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe
+C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.pdb
+C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\obj\Debug\POCSR.csproj.SuggestedBindingRedirects.cache
+C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\obj\Debug\POCSR.csproj.CoreCompileInputs.cache
+C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\obj\Debug\POCSR.csproj.CopyComplete
+C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\obj\Debug\POCServicioReguladores.exe
+C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\obj\Debug\POCServicioReguladores.pdb

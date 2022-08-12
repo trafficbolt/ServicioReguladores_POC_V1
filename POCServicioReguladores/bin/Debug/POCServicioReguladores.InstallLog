@@ -2288,3 +2288,24 @@ Los parámetros afectados son:
    logtoconsole = 
    assemblypath = C:\POCServicioReguladores\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe
    logfile = C:\POCServicioReguladores\POCServicioReguladores\bin\Debug\POCServicioReguladores.InstallLog
+Instalando ensamblado 'C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   assemblypath = C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe
+   logfile = C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.InstallLog
+Instalando el servicio MonitoreoReguladoresPOC...
+El servicio MonitoreoReguladoresPOC se ha instalado correctamente.
+Creando el origen de EventLog MonitoreoReguladoresPOC en el registro Application...
+Confirmando ensamblado 'C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   assemblypath = C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe
+   logfile = C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.InstallLog
+Desinstalando ensamblado 'C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe'.
+Los parámetros afectados son:
+   logtoconsole = 
+   assemblypath = C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.exe
+   logfile = C:\Users\Dell\Documents\GitHub\ServicioReguladores_POC\ServicioReguladores_POC_V1\POCServicioReguladores\bin\Debug\POCServicioReguladores.InstallLog
+Quitando el origen de EventLog MonitoreoReguladoresPOC.
+Se está quitando el servicio MonitoreoReguladoresPOC del sistema...
+El servicio MonitoreoReguladoresPOC se ha quitado correctamente del sistema.
